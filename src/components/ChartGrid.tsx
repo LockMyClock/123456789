@@ -23,8 +23,8 @@ export default function ChartGrid({
   const [dragButton, setDragButton] = useState<number>(0);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const cellSize = compact ? 26 : 38;
-  const fontSize = compact ? 9 : 11;
+  const cellSize = compact ? 24 : 38;
+  const fontSize = compact ? 8 : 11;
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent, key: string) => {
@@ -32,11 +32,8 @@ export default function ChartGrid({
       e.preventDefault();
       setIsDragging(true);
       setDragButton(e.button);
-      if (e.button === 2) {
-        onCellChange(key, null);
-      } else {
-        onCellChange(key, currentBrush);
-      }
+      if (e.button === 2) onCellChange(key, null);
+      else onCellChange(key, currentBrush);
     },
     [readOnly, onCellChange, currentBrush]
   );
@@ -44,22 +41,14 @@ export default function ChartGrid({
   const handleMouseEnter = useCallback(
     (key: string) => {
       if (!isDragging || readOnly || !onCellChange) return;
-      if (dragButton === 2) {
-        onCellChange(key, null);
-      } else {
-        onCellChange(key, currentBrush);
-      }
+      if (dragButton === 2) onCellChange(key, null);
+      else onCellChange(key, currentBrush);
     },
     [isDragging, dragButton, readOnly, onCellChange, currentBrush]
   );
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-  }, []);
+  const handleMouseUp = useCallback(() => setIsDragging(false), []);
+  const handleContextMenu = useCallback((e: React.MouseEvent) => e.preventDefault(), []);
 
   return (
     <div
@@ -71,12 +60,12 @@ export default function ChartGrid({
         display: 'grid',
         gridTemplateColumns: `repeat(13, ${cellSize}px)`,
         gap: 1,
-        background: 'rgba(0,0,0,0.4)',
+        background: 'rgba(0,0,0,0.5)',
         padding: 2,
-        borderRadius: 10,
+        borderRadius: 8,
         userSelect: 'none',
         width: 'fit-content',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid rgba(0,255,136,0.06)',
       }}
     >
       {RANKS.map((_, row) =>
@@ -85,7 +74,7 @@ export default function ChartGrid({
           const action = cells[key];
           const label = getCellLabel(row, col);
           const isHighlight = highlightCell === key;
-          const bg = action ? ACTION_COLORS[action] : '#0f0f23';
+          const bg = action ? ACTION_COLORS[action] : '#080818';
 
           return (
             <div
@@ -102,17 +91,17 @@ export default function ChartGrid({
                 cursor: readOnly ? 'default' : 'pointer',
                 fontSize,
                 fontWeight: 700,
-                color: action && action !== 'fold' ? '#fff' : 'rgba(255,255,255,0.3)',
-                borderRadius: 3,
+                color: action && action !== 'fold' ? '#fff' : 'rgba(255,255,255,0.2)',
+                borderRadius: 2,
                 transition: 'transform 0.1s, box-shadow 0.15s',
-                transform: isHighlight ? 'scale(1.2)' : undefined,
+                transform: isHighlight ? 'scale(1.25)' : undefined,
                 boxShadow: isHighlight
-                  ? '0 0 16px 4px rgba(59,130,246,0.8), 0 0 4px rgba(255,255,255,0.6)'
+                  ? '0 0 20px 5px rgba(0,170,255,0.8), 0 0 4px rgba(255,255,255,0.7)'
                   : undefined,
                 zIndex: isHighlight ? 10 : undefined,
                 position: 'relative',
                 textShadow: action && action !== 'fold' ? '0 1px 2px rgba(0,0,0,0.6)' : undefined,
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: 'var(--font-mono)',
                 letterSpacing: '-0.5px',
               }}
             >

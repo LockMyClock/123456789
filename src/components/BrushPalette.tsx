@@ -19,27 +19,28 @@ export default function BrushPalette({ currentBrush, onBrushChange }: BrushPalet
             key={action}
             onClick={() => onBrushChange(action)}
             style={{
-              background: isActive ? bg : `${bg}88`,
+              background: isActive ? bg : `${bg}66`,
               color: '#fff',
-              border: isActive ? '2px solid rgba(255,255,255,0.6)' : '2px solid transparent',
-              borderRadius: 10,
+              border: isActive ? '2px solid rgba(255,255,255,0.5)' : '2px solid transparent',
+              borderRadius: 8,
               padding: '8px 16px',
-              fontSize: 13,
-              fontWeight: 700,
+              fontSize: 12,
+              fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: isActive ? `0 0 20px ${bg}66` : '0 2px 8px rgba(0,0,0,0.3)',
+              boxShadow: isActive ? `0 0 20px ${bg}55` : 'none',
               transform: isActive ? 'scale(1.05)' : undefined,
               transition: 'all 0.15s',
-              letterSpacing: '0.3px',
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: 'var(--font-display)',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
             }}
           >
             {ACTION_LABELS[action]}
           </button>
         );
       })}
-      <span style={{ marginLeft: 8, color: 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 500 }}>
-        ПКМ = стереть
+      <span style={{ marginLeft: 8, color: 'rgba(255,255,255,0.2)', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
+        RMB = ERASE
       </span>
     </div>
   );

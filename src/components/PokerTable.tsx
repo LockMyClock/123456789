@@ -7,47 +7,53 @@ interface PokerTableProps {
 }
 
 const SEAT_POSITIONS: Record<Position, { x: number; y: number }> = {
-  UTG: { x: 18, y: 22 },
-  MP:  { x: 82, y: 22 },
-  CO:  { x: 94, y: 55 },
-  BTN: { x: 82, y: 85 },
-  SB:  { x: 38, y: 85 },
-  BB:  { x: 6,  y: 55 },
+  UTG: { x: 15, y: 18 },
+  MP:  { x: 85, y: 18 },
+  CO:  { x: 95, y: 52 },
+  BTN: { x: 80, y: 86 },
+  SB:  { x: 38, y: 86 },
+  BB:  { x: 5,  y: 52 },
 };
 
 export default function PokerTable({ heroPosition, villainPosition, highlightHero }: PokerTableProps) {
   const positions: Position[] = ['UTG', 'MP', 'CO', 'BTN', 'SB', 'BB'];
 
   return (
-    <div style={{ position: 'relative', width: '100%', maxWidth: 520, aspectRatio: '520/320', margin: '0 auto' }}>
-      <svg viewBox="0 0 520 320" style={{ width: '100%', height: '100%' }}>
+    <div style={{ position: 'relative', width: '100%', aspectRatio: '640/380', margin: '0 auto' }}>
+      <svg viewBox="0 0 640 380" style={{ width: '100%', height: '100%' }}>
         <defs>
-          <radialGradient id="feltGrad" cx="50%" cy="50%">
-            <stop offset="0%" stopColor="#1a6b3c" />
-            <stop offset="70%" stopColor="#145a30" />
-            <stop offset="100%" stopColor="#0d4423" />
+          <radialGradient id="felt" cx="50%" cy="50%">
+            <stop offset="0%" stopColor="#1d7a45" />
+            <stop offset="60%" stopColor="#166535" />
+            <stop offset="100%" stopColor="#0f4a28" />
           </radialGradient>
-          <filter id="tableShadow">
-            <feDropShadow dx="0" dy="4" stdDeviation="16" floodColor="#000" floodOpacity="0.7" />
+          <radialGradient id="feltShine" cx="40%" cy="35%">
+            <stop offset="0%" stopColor="rgba(255,255,255,0.04)" />
+            <stop offset="100%" stopColor="transparent" />
+          </radialGradient>
+          <filter id="shadow">
+            <feDropShadow dx="0" dy="6" stdDeviation="20" floodColor="#000" floodOpacity="0.7" />
           </filter>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
+          <filter id="innerGlow">
+            <feGaussianBlur stdDeviation="2" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
-        {/* Outer rail */}
-        <ellipse cx="260" cy="160" rx="255" ry="155" fill="#0d0d1a" filter="url(#tableShadow)" />
-        <ellipse cx="260" cy="160" rx="250" ry="150" fill="#2a1f0e" />
-        <ellipse cx="260" cy="160" rx="243" ry="143" fill="#3d2b14" stroke="#4a3520" strokeWidth="1" />
+
+        {/* Outer shadow */}
+        <ellipse cx="320" cy="190" rx="315" ry="185" fill="#050510" filter="url(#shadow)" />
+        {/* Rail gradient */}
+        <ellipse cx="320" cy="190" rx="310" ry="180" fill="#1a1008" />
+        <ellipse cx="320" cy="190" rx="305" ry="175" fill="#2d1f0f" />
+        <ellipse cx="320" cy="190" rx="298" ry="168" fill="#3d2a15" stroke="#4a3018" strokeWidth="1.5" />
         {/* Felt */}
-        <ellipse cx="260" cy="160" rx="228" ry="130" fill="url(#feltGrad)" />
+        <ellipse cx="320" cy="190" rx="280" ry="152" fill="url(#felt)" />
+        <ellipse cx="320" cy="190" rx="280" ry="152" fill="url(#feltShine)" />
         {/* Inner line */}
-        <ellipse cx="260" cy="160" rx="195" ry="105" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="4 4" />
-        <text x="260" y="162" textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.04)" fontSize="32" fontWeight="900" letterSpacing="8">
-          6-MAX
+        <ellipse cx="320" cy="190" rx="240" ry="122" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="6 6" />
+        {/* Center text */}
+        <text x="320" y="185" textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.025)" fontSize="40" fontWeight="900" fontFamily="Orbitron, sans-serif" letterSpacing="12">
+          6MAX
         </text>
       </svg>
 
@@ -57,20 +63,21 @@ export default function PokerTable({ heroPosition, villainPosition, highlightHer
         const isHero = pos === heroPosition;
         const isVillain = pos === villainPosition;
 
-        let bg = 'linear-gradient(135deg, #1e293b, #0f172a)';
-        let border = '2px solid rgba(255,255,255,0.1)';
-        let shadow = '0 2px 10px rgba(0,0,0,0.4)';
+        let bg = 'rgba(15,15,30,0.8)';
+        let border = '1.5px solid rgba(255,255,255,0.08)';
+        let shadow = '0 2px 10px rgba(0,0,0,0.5)';
+        let textColor = 'rgba(255,255,255,0.4)';
 
         if (isHero) {
-          bg = highlightHero
-            ? 'linear-gradient(135deg, #22c55e, #16a34a)'
-            : 'linear-gradient(135deg, #3b82f6, #2563eb)';
-          border = '2px solid rgba(255,255,255,0.4)';
-          shadow = `0 0 24px ${highlightHero ? 'rgba(34,197,94,0.6)' : 'rgba(59,130,246,0.6)'}`;
+          bg = 'linear-gradient(135deg, #00cc66, #00ff88)';
+          border = '2px solid rgba(255,255,255,0.5)';
+          shadow = '0 0 30px rgba(0,255,136,0.5)';
+          textColor = '#000';
         } else if (isVillain) {
-          bg = 'linear-gradient(135deg, #ef4444, #dc2626)';
+          bg = 'linear-gradient(135deg, #cc0033, #ff3355)';
           border = '2px solid rgba(255,255,255,0.3)';
-          shadow = '0 0 20px rgba(239,68,68,0.5)';
+          shadow = '0 0 25px rgba(255,51,85,0.5)';
+          textColor = '#fff';
         }
 
         return (
@@ -82,16 +89,16 @@ export default function PokerTable({ heroPosition, villainPosition, highlightHer
               top: `${sp.y}%`,
               transform: 'translate(-50%, -50%)',
               background: bg,
-              color: '#fff',
-              padding: '6px 16px',
+              color: textColor,
+              padding: '6px 18px',
               borderRadius: 24,
               fontSize: 13,
-              fontWeight: 800,
-              letterSpacing: '1px',
+              fontWeight: 900,
+              letterSpacing: '2px',
               boxShadow: shadow,
               border,
-              animation: isHero && highlightHero ? 'pulse 1.5s ease-in-out infinite' : undefined,
-              textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+              fontFamily: 'var(--font-display)',
+              animation: isHero && highlightHero ? 'pulse 2s ease-in-out infinite' : undefined,
             }}
           >
             {pos}
