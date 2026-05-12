@@ -32,6 +32,7 @@ export interface Chart {
   scenario: Scenario;
   vsPosition?: Position;
   cells: Record<string, Action>;
+  trainingCells?: Record<string, Action>;
   createdAt: number;
   updatedAt: number;
 }
@@ -80,6 +81,29 @@ export function getCellLabel(row: number, col: number): string {
   if (row === col) return `${r1}${r2}`;
   if (row < col) return `${r1}${r2}s`;
   return `${r2}${r1}o`;
+}
+
+export function generateTrainingCells(cells: Record<string, Action>): Record<string, Action> {
+  const filledKeys = Object.keys(cells);
+  if (filledKeys.length === 0) return {};
+
+  const sorted = filledKeys
+    .map(key => {
+      const [r, c] = key.split('-').map(Number);
+      return { key, r, c, action: cells[key] };
+    })
+    .sort((a, b) => {
+      const scoreA = a.r + a.c;
+      const scoreB = b.r + b.c;
+      return scoreB - scoreA;
+    });
+
+  const count = Math.max(2, Math.ceil(sorted.length * 0.10));
+  const training: Record<string, Action> = {};
+  for (let i = 0; i < Math.min(count, sorted.length); i++) {
+    training[sorted[i].key] = sorted[i].action;
+  }
+  return training;
 }
 
 export function getHandFromRowCol(row: number, col: number): { label: string; suited: boolean; pair: boolean } {

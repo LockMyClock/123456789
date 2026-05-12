@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Chart, Action, Position, Scenario } from '../types';
-import { POSITIONS, SCENARIOS } from '../types';
+import { POSITIONS, SCENARIOS, generateTrainingCells } from '../types';
 import ChartGrid from './ChartGrid';
 import BrushPalette from './BrushPalette';
 import { generateId } from '../utils/storage';
@@ -13,6 +13,8 @@ interface ChartEditorProps {
 
 const SECTIONS = ['Open', 'BB Defense', '3-Bet', 'vs 3-Bet', '4-Bet', 'vs 4-Bet', 'Custom'];
 
+type EditorTab = 'range' | 'training';
+
 export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProps) {
   const [name, setName] = useState(chart?.name || '');
   const [section, setSection] = useState(chart?.section || 'Open');
@@ -20,7 +22,9 @@ export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProp
   const [scenario, setScenario] = useState<Scenario>(chart?.scenario || 'Open');
   const [vsPosition, setVsPosition] = useState<Position | undefined>(chart?.vsPosition);
   const [cells, setCells] = useState<Record<string, Action>>(chart?.cells || {});
+  const [trainingCells, setTrainingCells] = useState<Record<string, Action>>(chart?.trainingCells || {});
   const [brush, setBrush] = useState<Action>('raise');
+  const [activeTab, setActiveTab] = useState<EditorTab>('range');
 
   const handleCellChange = (key: string, action: Action | null) => {
     setCells(prev => {
@@ -34,6 +38,22 @@ export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProp
     });
   };
 
+  const handleTrainingCellChange = (key: string, action: Action | null) => {
+    setTrainingCells(prev => {
+      const next = { ...prev };
+      if (action === null) {
+        delete next[key];
+      } else {
+        next[key] = action;
+      }
+      return next;
+    });
+  };
+
+  const handleAutoTraining = () => {
+    setTrainingCells(generateTrainingCells(cells));
+  };
+
   const handleSave = () => {
     const now = Date.now();
     onSave({
@@ -44,15 +64,23 @@ export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProp
       scenario,
       vsPosition: scenario.includes('vs') || scenario === 'BB Defense' ? vsPosition : undefined,
       cells,
+      trainingCells: Object.keys(trainingCells).length > 0 ? trainingCells : generateTrainingCells(cells),
       createdAt: chart?.createdAt || now,
       updatedAt: now,
     });
   };
 
-  const handleClear = () => setCells({});
+  const handleClear = () => {
+    if (activeTab === 'range') {
+      setCells({});
+    } else {
+      setTrainingCells({});
+    }
+  };
 
   const totalCells = 169;
   const filledCells = Object.keys(cells).length;
+  const trainingCount = Object.keys(trainingCells).length;
   const pct = ((filledCells / totalCells) * 100).toFixed(1);
 
   return (
@@ -165,6 +193,9 @@ export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProp
             <span style={{ color: 'rgba(255,255,255,0.5)' }}>Заполнено: </span>
             <span style={{ color: '#22c55e', fontWeight: 700 }}>{filledCells}</span>
             <span style={{ color: 'rgba(255,255,255,0.5)' }}> / {totalCells} ({pct}%)</span>
+            <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>|</span>
+            <span style={{ color: 'rgba(255,255,255,0.5)' }}>Тренировка: </span>
+            <span style={{ color: '#f59e0b', fontWeight: 700 }}>{trainingCount}</span>
           </div>
 
           <div style={{ display: 'flex', gap: 8 }}>
@@ -176,8 +207,68 @@ export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProp
 
         {/* Grid */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Tab switcher */}
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button
+              onClick={() => setActiveTab('range')}
+              style={{
+                background: activeTab === 'range' ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.05)',
+                color: activeTab === 'range' ? '#22c55e' : 'rgba(255,255,255,0.6)',
+                border: activeTab === 'range' ? '1px solid rgba(34,197,94,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 8,
+                padding: '6px 14px',
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Диапазон
+            </button>
+            <button
+              onClick={() => setActiveTab('training')}
+              style={{
+                background: activeTab === 'training' ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.05)',
+                color: activeTab === 'training' ? '#f59e0b' : 'rgba(255,255,255,0.6)',
+                border: activeTab === 'training' ? '1px solid rgba(245,158,11,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 8,
+                padding: '6px 14px',
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Тренировка ({trainingCount})
+            </button>
+            {activeTab === 'training' && (
+              <button
+                onClick={handleAutoTraining}
+                style={{
+                  background: 'rgba(168,85,247,0.2)',
+                  color: '#a855f7',
+                  border: '1px solid rgba(168,85,247,0.4)',
+                  borderRadius: 8,
+                  padding: '6px 14px',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                Авто (~10%)
+              </button>
+            )}
+          </div>
+
           <BrushPalette currentBrush={brush} onBrushChange={setBrush} />
-          <ChartGrid cells={cells} onCellChange={handleCellChange} currentBrush={brush} />
+          {activeTab === 'range' ? (
+            <ChartGrid cells={cells} onCellChange={handleCellChange} currentBrush={brush} />
+          ) : (
+            <ChartGrid
+              cells={trainingCells}
+              onCellChange={handleTrainingCellChange}
+              currentBrush={brush}
+              overlayCells={cells}
+            />
+          )}
         </div>
       </div>
     </div>

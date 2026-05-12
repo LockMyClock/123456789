@@ -1,4 +1,5 @@
 import type { Chart, Action } from '../types';
+import { generateTrainingCells } from '../types';
 
 function createCells(matrix: string[][]): Record<string, Action> {
   const cells: Record<string, Action> = {};
@@ -192,17 +193,21 @@ const bbDefVsUTG: string[][] = [
 
 const now = Date.now();
 
+function chartWithTraining(chart: Omit<Chart, 'trainingCells'>): Chart {
+  return { ...chart, trainingCells: generateTrainingCells(chart.cells) };
+}
+
 export const defaultCharts: Chart[] = [
   // Open charts
-  { id: 'default-utg-open', name: 'UTG Open', section: 'Open', position: 'UTG', scenario: 'Open', cells: createCells(utgOpen), createdAt: now, updatedAt: now },
-  { id: 'default-mp-open', name: 'MP Open', section: 'Open', position: 'MP', scenario: 'Open', cells: createCells(mpOpen), createdAt: now, updatedAt: now },
-  { id: 'default-co-open', name: 'CO Open', section: 'Open', position: 'CO', scenario: 'Open', cells: createCells(coOpen), createdAt: now, updatedAt: now },
-  { id: 'default-btn-open', name: 'BTN Open', section: 'Open', position: 'BTN', scenario: 'Open', cells: createCells(btnOpen), createdAt: now, updatedAt: now },
-  { id: 'default-sb-open', name: 'SB Open', section: 'Open', position: 'SB', scenario: 'Open', cells: createCells(sbOpen), createdAt: now, updatedAt: now },
+  chartWithTraining({ id: 'default-utg-open', name: 'UTG Open', section: 'Open', position: 'UTG', scenario: 'Open', cells: createCells(utgOpen), createdAt: now, updatedAt: now }),
+  chartWithTraining({ id: 'default-mp-open', name: 'MP Open', section: 'Open', position: 'MP', scenario: 'Open', cells: createCells(mpOpen), createdAt: now, updatedAt: now }),
+  chartWithTraining({ id: 'default-co-open', name: 'CO Open', section: 'Open', position: 'CO', scenario: 'Open', cells: createCells(coOpen), createdAt: now, updatedAt: now }),
+  chartWithTraining({ id: 'default-btn-open', name: 'BTN Open', section: 'Open', position: 'BTN', scenario: 'Open', cells: createCells(btnOpen), createdAt: now, updatedAt: now }),
+  chartWithTraining({ id: 'default-sb-open', name: 'SB Open', section: 'Open', position: 'SB', scenario: 'Open', cells: createCells(sbOpen), createdAt: now, updatedAt: now }),
   // BB Defense charts
-  { id: 'default-bb-vs-btn', name: 'BB vs BTN', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'BTN', cells: createCells(bbDefVsBtn), createdAt: now, updatedAt: now },
-  { id: 'default-bb-vs-sb', name: 'BB vs SB', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'SB', cells: createCells(bbDefVsSB), createdAt: now, updatedAt: now },
-  { id: 'default-bb-vs-co', name: 'BB vs CO', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'CO', cells: createCells(bbDefVsCO), createdAt: now, updatedAt: now },
-  { id: 'default-bb-vs-mp', name: 'BB vs MP', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'MP', cells: createCells(bbDefVsMP), createdAt: now, updatedAt: now },
-  { id: 'default-bb-vs-utg', name: 'BB vs UTG', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'UTG', cells: createCells(bbDefVsUTG), createdAt: now, updatedAt: now },
+  chartWithTraining({ id: 'default-bb-vs-btn', name: 'BB vs BTN', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'BTN', cells: createCells(bbDefVsBtn), createdAt: now, updatedAt: now }),
+  chartWithTraining({ id: 'default-bb-vs-sb', name: 'BB vs SB', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'SB', cells: createCells(bbDefVsSB), createdAt: now, updatedAt: now }),
+  chartWithTraining({ id: 'default-bb-vs-co', name: 'BB vs CO', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'CO', cells: createCells(bbDefVsCO), createdAt: now, updatedAt: now }),
+  chartWithTraining({ id: 'default-bb-vs-mp', name: 'BB vs MP', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'MP', cells: createCells(bbDefVsMP), createdAt: now, updatedAt: now }),
+  chartWithTraining({ id: 'default-bb-vs-utg', name: 'BB vs UTG', section: 'BB Defense', position: 'BB', scenario: 'BB Defense', vsPosition: 'UTG', cells: createCells(bbDefVsUTG), createdAt: now, updatedAt: now }),
 ];

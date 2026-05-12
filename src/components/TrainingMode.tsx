@@ -14,9 +14,10 @@ interface TrainingModeProps {
 }
 
 function pickRandomCell(chart: Chart): { row: number; col: number } | null {
-  const filledKeys = Object.keys(chart.cells);
-  if (filledKeys.length === 0) return null;
-  const key = filledKeys[Math.floor(Math.random() * filledKeys.length)];
+  const trainingKeys = chart.trainingCells ? Object.keys(chart.trainingCells) : [];
+  const sourceKeys = trainingKeys.length > 0 ? trainingKeys : Object.keys(chart.cells);
+  if (sourceKeys.length === 0) return null;
+  const key = sourceKeys[Math.floor(Math.random() * sourceKeys.length)];
   const [r, c] = key.split('-').map(Number);
   return { row: r, col: c };
 }
