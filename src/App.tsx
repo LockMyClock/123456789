@@ -26,84 +26,59 @@ function App() {
     setEditingChart(undefined);
   }, []);
 
-  const handleDeleteChart = useCallback((id: string) => {
-    setCharts(prev => prev.filter(c => c.id !== id));
-  }, []);
-
+  const handleDeleteChart = useCallback((id: string) => { setCharts(prev => prev.filter(c => c.id !== id)); }, []);
   const handleEdit = useCallback((chart: Chart) => { setEditingChart(chart); setView('editor'); }, []);
   const handleNewChart = useCallback(() => { setEditingChart(undefined); setView('editor'); }, []);
-  const handleStartTraining = useCallback((chartIds: string[]) => { setTrainingChartIds(chartIds); setView('training'); }, []);
+  const handleStartTraining = useCallback((ids: string[]) => { setTrainingChartIds(ids); setView('training'); }, []);
 
   const trainingCharts = charts.filter(c => trainingChartIds.includes(c.id));
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-deep)', position: 'relative' }}>
-      {/* Animated background layers */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,255,136,0.03) 0%, transparent 50%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(0,170,255,0.03) 0%, transparent 50%), radial-gradient(ellipse 40% 60% at 10% 60%, rgba(168,85,247,0.02) 0%, transparent 50%)',
-        }} />
-        {/* Grid */}
-        <div style={{
-          position: 'absolute', inset: 0, opacity: 0.02,
-          backgroundImage: 'linear-gradient(rgba(0,255,136,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.3) 1px, transparent 1px)',
-          backgroundSize: '80px 80px',
-        }} />
-        {/* Scanline */}
-        <div style={{
-          position: 'absolute', left: 0, right: 0, height: '200px', opacity: 0.015,
-          background: 'linear-gradient(180deg, transparent, rgba(0,255,136,0.5), transparent)',
-          animation: 'scanline 8s linear infinite',
-        }} />
+    <div className="min-h-screen relative" style={{ background: '#0a0e14' }}>
+      {/* Background effects */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(16,185,129,0.04) 0%, transparent 50%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(59,130,246,0.03) 0%, transparent 50%)',
+          }}
+        />
+        <div className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(16,185,129,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.3) 1px, transparent 1px)',
+            backgroundSize: '80px 80px',
+          }}
+        />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 1280, margin: '0 auto', padding: '12px 16px 40px' }}>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-3 pb-10">
         {/* Nav */}
         <motion.nav
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="hud-panel"
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', marginBottom: 20 }}
+          className="flex justify-between items-center bg-gray-900/80 backdrop-blur-sm border border-gray-700/30 rounded-xl px-5 py-2.5 mb-5"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 38, height: 38, borderRadius: 10,
-              background: 'linear-gradient(135deg, #00ff88, #00cc66)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, fontWeight: 900, color: '#000',
-              fontFamily: 'var(--font-display)',
-              boxShadow: '0 0 25px rgba(0,255,136,0.4)',
-            }}>P</div>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center font-black text-black text-base font-display"
+              style={{
+                background: 'linear-gradient(135deg, #34d399, #10b981)',
+                boxShadow: '0 0 20px rgba(16,185,129,0.4)',
+              }}
+            >P</div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 800, letterSpacing: '2px', lineHeight: 1.1 }}>
-                PREFLOP TRAINER
-              </div>
-              <div style={{ fontSize: 10, color: 'rgba(0,255,136,0.5)', fontWeight: 600, letterSpacing: '3px', fontFamily: 'var(--font-display)' }}>
-                6-MAX NL CASH
-              </div>
+              <div className="font-display text-sm font-black tracking-[2px] text-white leading-tight">PREFLOP TRAINER</div>
+              <div className="font-display text-[9px] font-semibold tracking-[3px] text-emerald-400/50">6-MAX NL CASH</div>
             </div>
           </div>
-
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div className="flex gap-1">
             {(['library', 'editor'] as const).map(v => (
               <button
                 key={v}
                 onClick={() => { setView(v); if (v === 'library') setEditingChart(undefined); }}
-                style={{
-                  background: view === v ? 'rgba(0,255,136,0.1)' : 'transparent',
-                  color: view === v ? '#00ff88' : 'rgba(255,255,255,0.4)',
-                  border: view === v ? '1px solid rgba(0,255,136,0.25)' : '1px solid transparent',
-                  borderRadius: 8,
-                  padding: '8px 16px',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  fontFamily: 'var(--font-display)',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase',
-                }}
+                className={`px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200 font-display cursor-pointer border ${
+                  view === v
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
+                    : 'bg-transparent text-gray-500 border-transparent hover:text-gray-300'
+                }`}
               >
                 {v === 'library' ? 'Library' : 'Editor'}
               </button>
@@ -114,17 +89,17 @@ function App() {
         {/* Content */}
         <AnimatePresence mode="wait">
           {view === 'library' && (
-            <motion.div key="library" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <motion.div key="lib" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
               <ChartLibrary charts={charts} onEdit={handleEdit} onDelete={handleDeleteChart} onStartTraining={handleStartTraining} onNewChart={handleNewChart} />
             </motion.div>
           )}
           {view === 'editor' && (
-            <motion.div key="editor" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <motion.div key="ed" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
               <ChartEditor chart={editingChart} onSave={handleSaveChart} onCancel={() => { setView('library'); setEditingChart(undefined); }} />
             </motion.div>
           )}
           {view === 'training' && trainingCharts.length > 0 && (
-            <motion.div key="training" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4 }}>
+            <motion.div key="tr" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.3 }}>
               <TrainingMode charts={trainingCharts} onExit={() => setView('library')} />
             </motion.div>
           )}

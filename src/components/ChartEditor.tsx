@@ -13,20 +13,6 @@ interface ChartEditorProps {
 
 const SECTIONS = ['Open', 'BB Defense', '3-Bet', 'vs 3-Bet', '4-Bet', 'vs 4-Bet', 'Custom'];
 
-const inputStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 8,
-  padding: '10px 14px',
-  color: '#fff',
-  fontSize: 14,
-  fontFamily: 'var(--font-body)',
-  fontWeight: 600,
-  outline: 'none',
-  transition: 'border-color 0.2s',
-  width: '100%',
-};
-
 export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProps) {
   const [name, setName] = useState(chart?.name || '');
   const [section, setSection] = useState(chart?.section || 'Open');
@@ -52,65 +38,57 @@ export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProp
       name: name || `${position} ${scenario}`,
       section, position, scenario,
       vsPosition: scenario.includes('vs') || scenario === 'BB Defense' ? vsPosition : undefined,
-      cells,
-      createdAt: chart?.createdAt || now,
-      updatedAt: now,
+      cells, createdAt: chart?.createdAt || now, updatedAt: now,
     });
   };
 
   const handleClear = () => setCells({});
-  const totalCells = 169;
-  const filledCells = Object.keys(cells).length;
-  const pct = ((filledCells / totalCells) * 100).toFixed(1);
+  const total = 169;
+  const filled = Object.keys(cells).length;
+  const pct = ((filled / total) * 100).toFixed(1);
 
-  const labelStyle: React.CSSProperties = {
-    fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700,
-    fontFamily: 'var(--font-display)', letterSpacing: '2px', textTransform: 'uppercase',
-  };
+  const inputCls = 'w-full bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm font-semibold outline-none transition-all focus:border-emerald-400/40 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        {/* Settings */}
-        <div className="hud-panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16, minWidth: 260 }}>
-          <div style={{
-            fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 900, letterSpacing: '2px',
-            color: '#ffaa00',
-          }}>
+    <div className="flex flex-col gap-5 animate-fade-in">
+      <div className="flex gap-6 flex-wrap items-start">
+        {/* Settings panel */}
+        <div className="bg-gray-900/80 border border-gray-700/30 rounded-xl p-5 flex flex-col gap-4 min-w-[260px] backdrop-blur-sm">
+          <div className="font-display text-base font-black tracking-[2px] text-amber-400">
             {chart ? 'EDIT CHART' : 'NEW CHART'}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label style={labelStyle}>Name</label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="UTG Open" style={inputStyle} />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] text-gray-500 font-bold tracking-[2px] uppercase font-display">Name</label>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="UTG Open" className={inputCls} />
           </div>
 
-          <div style={{ display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label style={labelStyle}>Section</label>
-              <select value={section} onChange={e => setSection(e.target.value)} style={inputStyle}>
+          <div className="flex gap-2">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-[10px] text-gray-500 font-bold tracking-[2px] uppercase font-display">Section</label>
+              <select value={section} onChange={e => setSection(e.target.value)} className={inputCls}>
                 {SECTIONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label style={labelStyle}>Position</label>
-              <select value={position} onChange={e => setPosition(e.target.value as Position)} style={inputStyle}>
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-[10px] text-gray-500 font-bold tracking-[2px] uppercase font-display">Position</label>
+              <select value={position} onChange={e => setPosition(e.target.value as Position)} className={inputCls}>
                 {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label style={labelStyle}>Scenario</label>
-              <select value={scenario} onChange={e => setScenario(e.target.value as Scenario)} style={inputStyle}>
+          <div className="flex gap-2">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-[10px] text-gray-500 font-bold tracking-[2px] uppercase font-display">Scenario</label>
+              <select value={scenario} onChange={e => setScenario(e.target.value as Scenario)} className={inputCls}>
                 {SCENARIOS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             {(scenario.includes('vs') || scenario === 'BB Defense') && (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                <label style={labelStyle}>vs Position</label>
-                <select value={vsPosition || ''} onChange={e => setVsPosition(e.target.value as Position)} style={inputStyle}>
+              <div className="flex-1 flex flex-col gap-1.5">
+                <label className="text-[10px] text-gray-500 font-bold tracking-[2px] uppercase font-display">vs Position</label>
+                <select value={vsPosition || ''} onChange={e => setVsPosition(e.target.value as Position)} className={inputCls}>
                   <option value="">—</option>
                   {POSITIONS.filter(p => p !== position).map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
@@ -118,26 +96,41 @@ export default function ChartEditor({ chart, onSave, onCancel }: ChartEditorProp
             )}
           </div>
 
-          {/* Progress bar */}
-          <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.04)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 6, fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
-              <span style={{ color: 'rgba(255,255,255,0.3)' }}>FILLED</span>
-              <span><span style={{ color: '#00ff88', fontWeight: 800 }}>{filledCells}</span><span style={{ color: 'rgba(255,255,255,0.2)' }}> / {totalCells} ({pct}%)</span></span>
+          {/* Progress */}
+          <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-3">
+            <div className="flex justify-between text-xs mb-1.5 font-display tracking-wider">
+              <span className="text-gray-500">FILLED</span>
+              <span>
+                <span className="text-emerald-400 font-black">{filled}</span>
+                <span className="text-gray-600"> / {total} ({pct}%)</span>
+              </span>
             </div>
-            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.04)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #00ff88, #00aaff)', borderRadius: 2, transition: 'width 0.3s' }} />
+            <div className="h-[3px] rounded-full bg-white/[0.04] overflow-hidden">
+              <div className="h-full rounded-full transition-[width] duration-300"
+                style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #10b981, #3b82f6)' }}
+              />
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={handleSave} className="btn-neon" style={{ flex: 1, padding: '10px', fontSize: 13 }}>SAVE</button>
-            <button onClick={handleClear} className="btn-ghost" style={{ color: '#ffaa00' }}>CLEAR</button>
-            <button onClick={onCancel} className="btn-ghost">CANCEL</button>
+          <div className="flex gap-2">
+            <button onClick={handleSave}
+              className="flex-1 py-2.5 rounded-xl font-display font-black tracking-wider text-xs text-black cursor-pointer transition-transform hover:-translate-y-0.5 border-0"
+              style={{ background: 'linear-gradient(135deg, #34d399, #10b981)', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}>
+              SAVE
+            </button>
+            <button onClick={handleClear}
+              className="px-3 py-2.5 rounded-lg text-xs font-bold bg-white/5 text-amber-400 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
+              CLEAR
+            </button>
+            <button onClick={onCancel}
+              className="px-3 py-2.5 rounded-lg text-xs font-bold bg-white/5 text-gray-400 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
+              CANCEL
+            </button>
           </div>
         </div>
 
         {/* Grid */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="flex flex-col gap-3">
           <BrushPalette currentBrush={brush} onBrushChange={setBrush} />
           <ChartGrid cells={cells} onCellChange={handleCellChange} currentBrush={brush} />
         </div>

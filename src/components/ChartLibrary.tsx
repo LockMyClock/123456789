@@ -26,61 +26,58 @@ export default function ChartLibrary({ charts, onEdit, onDelete, onStartTraining
   }, [charts]);
 
   const toggleChart = useCallback((id: string) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    setSelected(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   }, []);
 
   const toggleSection = useCallback((section: string) => {
-    setCollapsed(prev => {
-      const next = new Set(prev);
-      if (next.has(section)) next.delete(section);
-      else next.add(section);
-      return next;
-    });
+    setCollapsed(prev => { const n = new Set(prev); if (n.has(section)) n.delete(section); else n.add(section); return n; });
   }, []);
 
   const toggleSectionSelect = useCallback((section: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const sectionCharts = sections.get(section);
-    if (!sectionCharts) return;
-    const sectionIds = sectionCharts.map(c => c.id);
-    const allSelected = sectionIds.every(id => selected.has(id));
+    const sc = sections.get(section);
+    if (!sc) return;
+    const ids = sc.map(c => c.id);
+    const all = ids.every(id => selected.has(id));
     setSelected(prev => {
-      const next = new Set(prev);
-      if (allSelected) sectionIds.forEach(id => next.delete(id));
-      else sectionIds.forEach(id => next.add(id));
-      return next;
+      const n = new Set(prev);
+      if (all) ids.forEach(id => n.delete(id));
+      else ids.forEach(id => n.add(id));
+      return n;
     });
   }, [sections, selected]);
 
   const selectAll = useCallback(() => {
-    const allIds = charts.map(c => c.id);
-    const allSelected = allIds.every(id => selected.has(id));
-    setSelected(allSelected ? new Set() : new Set(allIds));
+    const all = charts.map(c => c.id);
+    const allSel = all.every(id => selected.has(id));
+    setSelected(allSel ? new Set() : new Set(all));
   }, [charts, selected]);
 
   const allSelected = charts.length > 0 && charts.every(c => selected.has(c.id));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="flex flex-col gap-4 animate-fade-in">
       {/* Header */}
-      <div className="hud-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 900, letterSpacing: '3px', color: '#00ff88' }}>
-          CHART LIBRARY
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={selectAll} className="btn-ghost" style={{ fontFamily: 'var(--font-display)', fontSize: 11, letterSpacing: '1px' }}>
+      <div className="flex items-center justify-between bg-gray-900/80 backdrop-blur-sm border border-gray-700/30 rounded-xl px-5 py-3">
+        <div className="font-display text-lg font-black tracking-[3px] text-emerald-400">CHART LIBRARY</div>
+        <div className="flex gap-2">
+          <button onClick={selectAll} className="px-3 py-1.5 text-xs font-bold rounded-lg bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10 transition-colors font-display tracking-wider cursor-pointer">
             {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
           </button>
-          <button onClick={onNewChart} className="btn-accent" style={{ fontFamily: 'var(--font-display)', fontSize: 11, letterSpacing: '1px' }}>
+          <button onClick={onNewChart} className="px-3 py-1.5 text-xs font-bold rounded-lg text-white border border-blue-500/30 hover:bg-blue-500/10 transition-colors font-display tracking-wider cursor-pointer"
+            style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.15), rgba(37,99,235,0.05))' }}>
             + NEW CHART
           </button>
           {selected.size > 0 && (
-            <button onClick={() => onStartTraining(Array.from(selected))} className="btn-neon" style={{ fontSize: 12, padding: '10px 20px' }}>
+            <button
+              onClick={() => onStartTraining(Array.from(selected))}
+              className="px-4 py-1.5 text-xs font-black rounded-lg text-black font-display tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5"
+              style={{
+                background: 'linear-gradient(135deg, #34d399, #10b981)',
+                boxShadow: '0 0 20px rgba(16,185,129,0.3)',
+                animation: 'neonBreathe 2.5s ease-in-out infinite',
+              }}
+            >
               TRAIN ({selected.size})
             </button>
           )}
@@ -89,153 +86,77 @@ export default function ChartLibrary({ charts, onEdit, onDelete, onStartTraining
 
       {/* Sections */}
       {Array.from(sections.entries()).map(([section, sectionCharts]) => {
-        const isCollapsed = collapsed.has(section);
-        const sectionIds = sectionCharts.map(c => c.id);
-        const sectionSelectedCount = sectionIds.filter(id => selected.has(id)).length;
-        const allSectionSelected = sectionSelectedCount === sectionIds.length;
-        const partialSelected = sectionSelectedCount > 0 && !allSectionSelected;
+        const isCol = collapsed.has(section);
+        const ids = sectionCharts.map(c => c.id);
+        const selCount = ids.filter(id => selected.has(id)).length;
+        const allSel = selCount === ids.length;
+        const partial = selCount > 0 && !allSel;
 
         return (
-          <div key={section} className="hud-panel" style={{ overflow: 'visible' }}>
-            {/* Section header */}
+          <div key={section} className="bg-gray-900/60 border border-gray-700/20 rounded-xl overflow-visible">
             <div
               onClick={() => toggleSection(section)}
-              style={{
-                display: 'flex', alignItems: 'center', padding: '12px 16px', cursor: 'pointer',
-                gap: 12, justifyContent: 'space-between',
-                borderBottom: isCollapsed ? 'none' : '1px solid rgba(255,255,255,0.04)',
-              }}
+              className="flex items-center justify-between px-4 py-3 cursor-pointer select-none"
+              style={{ borderBottom: isCol ? 'none' : '1px solid rgba(255,255,255,0.04)' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="flex items-center gap-3">
                 {/* Section checkbox */}
                 <div
                   onClick={(e) => toggleSectionSelect(section, e)}
-                  style={{
-                    width: 24, height: 24, borderRadius: 6,
-                    border: `2px solid ${allSectionSelected ? '#00ff88' : partialSelected ? '#ffaa00' : 'rgba(255,255,255,0.15)'}`,
-                    background: allSectionSelected ? 'rgba(0,255,136,0.15)' : partialSelected ? 'rgba(255,170,0,0.1)' : 'transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, color: allSectionSelected ? '#00ff88' : '#ffaa00',
-                    fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0,
-                  }}
+                  className={`w-6 h-6 rounded-md border-2 flex items-center justify-center text-sm font-black cursor-pointer transition-all shrink-0 ${
+                    allSel ? 'border-emerald-400 bg-emerald-500/15 text-emerald-400' :
+                    partial ? 'border-amber-400 bg-amber-400/10 text-amber-400' :
+                    'border-gray-600 bg-transparent text-transparent'
+                  }`}
                 >
-                  {allSectionSelected ? '✓' : partialSelected ? '−' : ''}
+                  {allSel ? '✓' : partial ? '−' : ''}
                 </div>
 
-                <span style={{
-                  color: isCollapsed ? 'rgba(255,255,255,0.4)' : '#fff',
-                  fontSize: 12, opacity: 0.5,
-                  transition: 'transform 0.2s', display: 'inline-block',
-                  transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-                }}>▼</span>
+                <span className={`text-xs transition-transform duration-200 ${isCol ? '-rotate-90' : ''} text-gray-500`}>▼</span>
 
-                <span style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 14,
-                  fontWeight: 800,
-                  letterSpacing: '2px',
-                  color: '#fff',
-                  textTransform: 'uppercase',
-                }}>
-                  {section}
-                </span>
-
-                <span style={{
-                  fontSize: 11,
-                  color: 'rgba(255,255,255,0.2)',
-                  fontFamily: 'var(--font-display)',
-                  letterSpacing: '1px',
-                }}>
-                  {sectionCharts.length}
-                </span>
+                <span className="font-display text-sm font-black tracking-[2px] text-white uppercase">{section}</span>
+                <span className="text-xs text-gray-600 font-display tracking-wider">{sectionCharts.length}</span>
               </div>
 
-              {sectionSelectedCount > 0 && (
-                <span style={{
-                  fontSize: 11,
-                  color: '#00ff88',
-                  fontWeight: 700,
-                  fontFamily: 'var(--font-display)',
-                  letterSpacing: '1px',
-                }}>
-                  {sectionSelectedCount}/{sectionCharts.length}
-                </span>
+              {selCount > 0 && (
+                <span className="text-xs text-emerald-400 font-bold font-display tracking-wider">{selCount}/{sectionCharts.length}</span>
               )}
             </div>
 
-            {/* Charts grid */}
             <AnimatePresence>
-              {!isCollapsed && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  style={{ overflow: 'hidden' }}
-                >
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                    gap: 10,
-                    padding: '12px 16px 16px',
-                  }}>
+              {!isCol && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(135px,1fr))] gap-2.5 p-3 pt-1">
                     {sectionCharts.map(chart => {
-                      const isChecked = selected.has(chart.id);
+                      const chk = selected.has(chart.id);
                       return (
                         <div
                           key={chart.id}
-                          style={{
-                            background: isChecked ? 'rgba(0,255,136,0.04)' : 'rgba(255,255,255,0.02)',
-                            borderRadius: 12,
-                            padding: '10px 8px 8px',
-                            border: `1px solid ${isChecked ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.04)'}`,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                          }}
                           onClick={() => toggleChart(chart.id)}
+                          className={`rounded-xl p-2.5 cursor-pointer transition-all border ${
+                            chk ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-white/[0.02] border-white/[0.04] hover:border-white/10'
+                          }`}
                         >
-                          {/* Chart header */}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <div style={{
-                                width: 16, height: 16, borderRadius: 4,
-                                border: `1.5px solid ${isChecked ? '#00ff88' : 'rgba(255,255,255,0.15)'}`,
-                                background: isChecked ? 'rgba(0,255,136,0.2)' : 'transparent',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 10, color: '#00ff88', fontWeight: 900,
-                              }}>
-                                {isChecked ? '✓' : ''}
-                              </div>
-                              <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', fontFamily: 'var(--font-body)' }}>
-                                {chart.name}
-                              </span>
+                          <div className="flex items-center gap-1.5 mb-1.5">
+                            <div className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center text-[9px] font-black shrink-0 ${
+                              chk ? 'border-emerald-400 bg-emerald-500/20 text-emerald-400' : 'border-gray-600'
+                            }`}>
+                              {chk ? '✓' : ''}
                             </div>
+                            <span className="text-xs font-bold text-white truncate">{chart.name}</span>
                           </div>
-
-                          {/* Mini chart */}
-                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          <div className="flex justify-center">
                             <ChartGrid cells={chart.cells} readOnly compact />
                           </div>
-
-                          {/* Actions */}
-                          <div style={{ display: 'flex', gap: 4, marginTop: 8, justifyContent: 'center' }}>
+                          <div className="flex gap-1 mt-2 justify-center">
                             <button
-                              className="btn-tiny"
-                              style={{ background: 'rgba(0,170,255,0.15)', color: '#00aaff' }}
+                              className="px-2 py-0.5 text-[10px] font-bold rounded bg-blue-500/10 text-blue-400 border-0 cursor-pointer hover:bg-blue-500/20 transition-colors"
                               onClick={(e) => { e.stopPropagation(); onEdit(chart); }}
-                            >
-                              Edit
-                            </button>
+                            >Edit</button>
                             <button
-                              className="btn-tiny"
-                              style={{ background: 'rgba(255,51,85,0.1)', color: '#ff3355' }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (confirm('Delete chart?')) onDelete(chart.id);
-                              }}
-                            >
-                              Del
-                            </button>
+                              className="px-2 py-0.5 text-[10px] font-bold rounded bg-red-500/10 text-red-400 border-0 cursor-pointer hover:bg-red-500/20 transition-colors"
+                              onClick={(e) => { e.stopPropagation(); if (confirm('Delete?')) onDelete(chart.id); }}
+                            >Del</button>
                           </div>
                         </div>
                       );
@@ -249,13 +170,12 @@ export default function ChartLibrary({ charts, onEdit, onDelete, onStartTraining
       })}
 
       {charts.length === 0 && (
-        <div className="hud-panel" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, letterSpacing: '2px', color: 'rgba(255,255,255,0.3)' }}>
-            NO CHARTS YET
-          </div>
-          <div style={{ marginTop: 16 }}>
-            <button onClick={onNewChart} className="btn-neon">CREATE FIRST CHART</button>
-          </div>
+        <div className="bg-gray-900/60 border border-gray-700/20 rounded-xl p-10 text-center">
+          <div className="font-display text-sm tracking-[3px] text-gray-500">NO CHARTS YET</div>
+          <button onClick={onNewChart} className="mt-4 px-6 py-2.5 rounded-xl font-display font-black tracking-wider text-sm text-black cursor-pointer"
+            style={{ background: 'linear-gradient(135deg, #34d399, #10b981)', boxShadow: '0 0 20px rgba(16,185,129,0.3)' }}>
+            CREATE FIRST CHART
+          </button>
         </div>
       )}
     </div>
