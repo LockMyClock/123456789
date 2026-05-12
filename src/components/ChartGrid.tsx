@@ -23,7 +23,7 @@ export default function ChartGrid({
   const [dragButton, setDragButton] = useState<number>(0);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const cellSize = compact ? 28 : 40;
+  const cellSize = compact ? 26 : 38;
   const fontSize = compact ? 9 : 11;
 
   const handleMouseDown = useCallback(
@@ -71,11 +71,12 @@ export default function ChartGrid({
         display: 'grid',
         gridTemplateColumns: `repeat(13, ${cellSize}px)`,
         gap: 1,
-        background: 'rgba(0,0,0,0.3)',
-        padding: 1,
-        borderRadius: 8,
+        background: 'rgba(0,0,0,0.4)',
+        padding: 2,
+        borderRadius: 10,
         userSelect: 'none',
         width: 'fit-content',
+        border: '1px solid rgba(255,255,255,0.06)',
       }}
     >
       {RANKS.map((_, row) =>
@@ -84,8 +85,7 @@ export default function ChartGrid({
           const action = cells[key];
           const label = getCellLabel(row, col);
           const isHighlight = highlightCell === key;
-          const bg = action ? ACTION_COLORS[action] : '#1a1a2e';
-          const isMixed = action === 'mixed';
+          const bg = action ? ACTION_COLORS[action] : '#0f0f23';
 
           return (
             <div
@@ -95,23 +95,25 @@ export default function ChartGrid({
               style={{
                 width: cellSize,
                 height: cellSize,
-                background: isMixed ? ACTION_COLORS.mixed : bg,
+                background: bg,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: readOnly ? 'default' : 'pointer',
                 fontSize,
-                fontWeight: 600,
-                color: action && action !== 'fold' ? '#fff' : 'rgba(255,255,255,0.4)',
+                fontWeight: 700,
+                color: action && action !== 'fold' ? '#fff' : 'rgba(255,255,255,0.3)',
                 borderRadius: 3,
-                transition: 'transform 0.1s, box-shadow 0.1s',
-                transform: isHighlight ? 'scale(1.15)' : undefined,
+                transition: 'transform 0.1s, box-shadow 0.15s',
+                transform: isHighlight ? 'scale(1.2)' : undefined,
                 boxShadow: isHighlight
-                  ? '0 0 12px 3px rgba(255,255,255,0.7)'
+                  ? '0 0 16px 4px rgba(59,130,246,0.8), 0 0 4px rgba(255,255,255,0.6)'
                   : undefined,
                 zIndex: isHighlight ? 10 : undefined,
                 position: 'relative',
-                textShadow: action && action !== 'fold' ? '0 1px 2px rgba(0,0,0,0.5)' : undefined,
+                textShadow: action && action !== 'fold' ? '0 1px 2px rgba(0,0,0,0.6)' : undefined,
+                fontFamily: "'Inter', sans-serif",
+                letterSpacing: '-0.5px',
               }}
             >
               {label}
