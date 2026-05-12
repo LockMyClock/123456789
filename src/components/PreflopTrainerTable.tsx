@@ -17,40 +17,44 @@ interface PreflopTrainerTableProps {
 
 const ALL_POSITIONS: Position[] = ['UTG', 'MP', 'CO', 'BTN', 'SB', 'BB'];
 
-const SEAT_ANGLES: Record<number, { x: number; y: number }> = {
-  0: { x: 50, y: 90 },   // bottom center (hero)
-  1: { x: 10, y: 65 },   // left-bottom
-  2: { x: 5,  y: 28 },   // left-top
-  3: { x: 35, y: 8 },    // top-left
-  4: { x: 65, y: 8 },    // top-right
-  5: { x: 95, y: 28 },   // right-top
+// 6 seats around the table: hero is always seat 0 (bottom center)
+// Positions are placed around the ellipse
+const SEAT_COORDS: Record<number, { x: number; y: number }> = {
+  0: { x: 50, y: 97 },   // bottom center (hero) — just below table edge
+  1: { x: 3,  y: 68 },   // left-bottom
+  2: { x: 3,  y: 25 },   // left-top
+  3: { x: 35, y: 2 },    // top-left
+  4: { x: 65, y: 2 },    // top-right
+  5: { x: 97, y: 25 },   // right-top
 };
 
-const CARD_OFFSETS: Record<number, { x: number; y: number }> = {
-  0: { x: 50, y: 72 },
-  1: { x: 17, y: 58 },
-  2: { x: 13, y: 30 },
-  3: { x: 38, y: 16 },
-  4: { x: 62, y: 16 },
-  5: { x: 87, y: 30 },
+// Where opponent face-down cards go (inside the table)
+const OPPONENT_CARD_COORDS: Record<number, { x: number; y: number }> = {
+  1: { x: 16, y: 58 },
+  2: { x: 14, y: 30 },
+  3: { x: 38, y: 15 },
+  4: { x: 62, y: 15 },
+  5: { x: 86, y: 30 },
 };
 
+// Offset for dealer button relative to seat
 const DEALER_OFFSETS: Record<number, { dx: number; dy: number }> = {
-  0: { dx: 8, dy: -8 },
-  1: { dx: 8, dy: -5 },
-  2: { dx: 8, dy: 5 },
-  3: { dx: 5, dy: 8 },
-  4: { dx: -5, dy: 8 },
+  0: { dx: 8,  dy: -6 },
+  1: { dx: 8,  dy: -3 },
+  2: { dx: 8,  dy: 5 },
+  3: { dx: 6,  dy: 7 },
+  4: { dx: -6, dy: 7 },
   5: { dx: -8, dy: 5 },
 };
 
-const BLIND_OFFSETS: Record<number, { dx: number; dy: number }> = {
-  0: { dx: 0, dy: -12 },
-  1: { dx: 8, dy: -6 },
-  2: { dx: 8, dy: 4 },
-  3: { dx: 4, dy: 8 },
-  4: { dx: -4, dy: 8 },
-  5: { dx: -8, dy: 4 },
+// Offset for blind chips relative to opponent card position (or seat for hero)
+const BLIND_CHIP_COORDS: Record<number, { x: number; y: number }> = {
+  0: { x: 50, y: 78 },
+  1: { x: 24, y: 60 },
+  2: { x: 22, y: 34 },
+  3: { x: 40, y: 22 },
+  4: { x: 60, y: 22 },
+  5: { x: 78, y: 34 },
 };
 
 function getRotatedPositions(heroPos: Position): Position[] {
@@ -75,131 +79,121 @@ export default function PreflopTrainerTable({
   const sbSeatIdx = rotated.indexOf('SB');
   const bbSeatIdx = rotated.indexOf('BB');
 
-  const btnPos = SEAT_ANGLES[btnSeatIdx];
-  const btnOff = DEALER_OFFSETS[btnSeatIdx];
-
-  const sbCard = CARD_OFFSETS[sbSeatIdx];
-  const sbBlindOff = BLIND_OFFSETS[sbSeatIdx];
-  const bbCard = CARD_OFFSETS[bbSeatIdx];
-  const bbBlindOff = BLIND_OFFSETS[bbSeatIdx];
-
   return (
-    <div className="relative w-full max-w-[720px] mx-auto" style={{ aspectRatio: '720/440' }}>
-      {/* Table SVG */}
-      <svg viewBox="0 0 720 440" className="w-full h-full absolute inset-0">
-        <defs>
-          <radialGradient id="feltGrad" cx="50%" cy="50%">
-            <stop offset="0%" stopColor="#1d7a45" />
-            <stop offset="50%" stopColor="#166535" />
-            <stop offset="100%" stopColor="#0f4a28" />
-          </radialGradient>
-          <radialGradient id="feltShine" cx="40%" cy="35%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
-            <stop offset="100%" stopColor="transparent" />
-          </radialGradient>
-          <filter id="tableShadow">
-            <feDropShadow dx="0" dy="8" stdDeviation="25" floodColor="#000" floodOpacity="0.8" />
-          </filter>
-        </defs>
-        {/* Outer shadow */}
-        <ellipse cx="360" cy="220" rx="355" ry="215" fill="#0a0e14" filter="url(#tableShadow)" />
-        {/* Rail layers */}
-        <ellipse cx="360" cy="220" rx="350" ry="210" fill="#1a100a" />
-        <ellipse cx="360" cy="220" rx="344" ry="204" fill="#2d1c0f" />
-        <ellipse cx="360" cy="220" rx="338" ry="198"
-          fill="url(#feltGrad)"
-          stroke="#3d2a15" strokeWidth="3"
-        />
-        {/* Shine overlay */}
-        <ellipse cx="360" cy="220" rx="338" ry="198" fill="url(#feltShine)" />
-        {/* Inner dashed ring */}
-        <ellipse cx="360" cy="220" rx="280" ry="150" fill="none" stroke="rgba(255,255,255,0.035)" strokeWidth="1" strokeDasharray="8 8" />
-        {/* Center watermark */}
-        <text x="360" y="195" textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.025)" fontSize="32" fontWeight="900" fontFamily="Orbitron, sans-serif" letterSpacing="8">
-          PREFLOP
-        </text>
-        <text x="360" y="230" textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.018)" fontSize="18" fontWeight="700" fontFamily="Orbitron, sans-serif" letterSpacing="12">
-          TRAINER
-        </text>
-      </svg>
+    <div className="relative w-full max-w-[750px] mx-auto flex flex-col items-center">
+      {/* Table wrapper */}
+      <div className="relative w-full" style={{ aspectRatio: '750/420' }}>
+        {/* Table SVG */}
+        <svg viewBox="0 0 750 420" className="w-full h-full absolute inset-0">
+          <defs>
+            <radialGradient id="feltGrad" cx="50%" cy="48%">
+              <stop offset="0%" stopColor="#1d7a45" />
+              <stop offset="50%" stopColor="#166535" />
+              <stop offset="100%" stopColor="#0f4a28" />
+            </radialGradient>
+            <radialGradient id="feltShine" cx="40%" cy="35%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.06)" />
+              <stop offset="100%" stopColor="transparent" />
+            </radialGradient>
+            <filter id="outerShadow">
+              <feDropShadow dx="0" dy="6" stdDeviation="20" floodColor="#000" floodOpacity="0.7" />
+            </filter>
+          </defs>
+          {/* Shadow */}
+          <ellipse cx="375" cy="210" rx="370" ry="205" fill="#080c12" filter="url(#outerShadow)" />
+          {/* Rail */}
+          <ellipse cx="375" cy="210" rx="365" ry="200" fill="#1a100a" />
+          <ellipse cx="375" cy="210" rx="358" ry="193" fill="#2d1c0f" />
+          <ellipse cx="375" cy="210" rx="352" ry="187"
+            fill="url(#feltGrad)" stroke="#3d2a15" strokeWidth="2.5"
+          />
+          <ellipse cx="375" cy="210" rx="352" ry="187" fill="url(#feltShine)" />
+          {/* Dashed inner ring */}
+          <ellipse cx="375" cy="210" rx="290" ry="145" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="6 6" />
+          {/* Watermark */}
+          <text x="375" y="200" textAnchor="middle" dominantBaseline="central"
+            fill="rgba(255,255,255,0.025)" fontSize="28" fontWeight="900"
+            fontFamily="Orbitron, sans-serif" letterSpacing="6">
+            ПОКЕРОК
+          </text>
+        </svg>
 
-      {/* Pot info in center */}
-      <div className="absolute z-20" style={{ left: '50%', top: '45%', transform: 'translate(-50%, -50%)' }}>
-        <PotInfo potBB={1.5} heroPosition={heroPosition} scenario={scenario} />
-      </div>
+        {/* Pot info in center */}
+        <div className="absolute z-20" style={{ left: '50%', top: '42%', transform: 'translate(-50%, -50%)' }}>
+          <PotInfo potBB={1.5} heroPosition={heroPosition} scenario={scenario} />
+        </div>
 
-      {/* Seats */}
-      {rotated.map((pos, seatIdx) => {
-        const coord = SEAT_ANGLES[seatIdx];
-        const cardCoord = CARD_OFFSETS[seatIdx];
-        const isHero = seatIdx === 0;
-        const isVillain = pos === villainPosition;
+        {/* Seats */}
+        {rotated.map((pos, seatIdx) => {
+          const isHero = seatIdx === 0;
+          if (isHero) return null; // hero label rendered outside table
+          const coord = SEAT_COORDS[seatIdx];
+          const isVillain = pos === villainPosition;
+          const oppCardCoord = OPPONENT_CARD_COORDS[seatIdx];
 
-        return (
-          <div key={pos}>
-            {/* Position label */}
-            <div
-              className="absolute z-30"
-              style={{
-                left: `${coord.x}%`,
-                top: `${coord.y}%`,
-                transform: 'translate(-50%, -50%)',
-              }}
-            >
-              <PositionLabel
-                position={pos}
-                isHero={isHero}
-                isActive={isVillain}
-              />
-            </div>
-
-            {/* Opponent cards */}
-            {!isHero && (
+          return (
+            <div key={pos}>
+              {/* Seat label */}
               <div
-                className="absolute z-15"
+                className="absolute z-30"
                 style={{
-                  left: `${cardCoord.x}%`,
-                  top: `${cardCoord.y}%`,
+                  left: `${coord.x}%`,
+                  top: `${coord.y}%`,
                   transform: 'translate(-50%, -50%)',
                 }}
               >
-                <OpponentCards />
+                <PositionLabel
+                  position={pos}
+                  isHero={false}
+                  isActive={isVillain}
+                />
               </div>
-            )}
-          </div>
-        );
-      })}
 
-      {/* Dealer button */}
-      <DealerButton
-        x={btnPos.x + btnOff.dx}
-        y={btnPos.y + btnOff.dy}
-      />
+              {/* Opponent face-down cards (inside table) */}
+              {oppCardCoord && (
+                <div
+                  className="absolute z-10"
+                  style={{
+                    left: `${oppCardCoord.x}%`,
+                    top: `${oppCardCoord.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <OpponentCards />
+                </div>
+              )}
+            </div>
+          );
+        })}
 
-      {/* SB chip */}
-      <BlindChip
-        type="sb"
-        x={sbCard.x + sbBlindOff.dx}
-        y={sbCard.y + sbBlindOff.dy}
-      />
+        {/* Dealer button — near BTN seat */}
+        {(() => {
+          const btnCoord = SEAT_COORDS[btnSeatIdx];
+          const btnOff = DEALER_OFFSETS[btnSeatIdx];
+          return <DealerButton x={btnCoord.x + btnOff.dx} y={btnCoord.y + btnOff.dy} />;
+        })()}
 
-      {/* BB chip */}
-      <BlindChip
-        type="bb"
-        x={bbCard.x + bbBlindOff.dx}
-        y={bbCard.y + bbBlindOff.dy}
-      />
+        {/* SB blind chip */}
+        {(() => {
+          const c = BLIND_CHIP_COORDS[sbSeatIdx];
+          return <BlindChip type="sb" x={c.x} y={c.y} />;
+        })()}
 
-      {/* Hero cards — centered at bottom */}
+        {/* BB blind chip */}
+        {(() => {
+          const c = BLIND_CHIP_COORDS[bbSeatIdx];
+          return <BlindChip type="bb" x={c.x} y={c.y} />;
+        })()}
+      </div>
+
+      {/* Hero position label */}
+      <div className="z-30 -mt-6 mb-1">
+        <PositionLabel position={heroPosition} isHero isActive={false} />
+      </div>
+
+      {/* Hero cards — below the table, centered */}
       {heroCards && (
-        <div
-          className="absolute z-40"
-          style={{
-            left: '50%',
-            bottom: '2%',
-            transform: 'translateX(-50%)',
-          }}
-        >
+        <div className="z-40 -mt-1">
           <HeroHand cards={heroCards} dealKey={dealKey} />
         </div>
       )}
