@@ -9,6 +9,7 @@ interface ChartGridProps {
   currentBrush?: Action;
   highlightCell?: string;
   compact?: boolean;
+  overlayCells?: Record<string, Action>;
 }
 
 export default function ChartGrid({
@@ -18,6 +19,7 @@ export default function ChartGrid({
   currentBrush = 'raise',
   highlightCell,
   compact = false,
+  overlayCells,
 }: ChartGridProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragButton, setDragButton] = useState<number>(0);
@@ -82,10 +84,22 @@ export default function ChartGrid({
         RANKS.map((__, col) => {
           const key = `${row}-${col}`;
           const action = cells[key];
+          const overlayAction = overlayCells ? overlayCells[key] : undefined;
           const label = getCellLabel(row, col);
           const isHighlight = highlightCell === key;
-          const bg = action ? ACTION_COLORS[action] : '#1a1a2e';
-          const isMixed = action === 'mixed';
+
+          let bg: string;
+          if (overlayCells) {
+            if (action) {
+              bg = action === 'mixed' ? ACTION_COLORS.mixed : ACTION_COLORS[action];
+            } else if (overlayAction) {
+              bg = `${overlayAction === 'mixed' ? '#f59e0b' : ACTION_COLORS[overlayAction]}33`;
+            } else {
+              bg = '#1a1a2e';
+            }
+          } else {
+            bg = action ? (action === 'mixed' ? ACTION_COLORS.mixed : ACTION_COLORS[action]) : '#1a1a2e';
+          }
 
           return (
             <div
@@ -95,7 +109,7 @@ export default function ChartGrid({
               style={{
                 width: cellSize,
                 height: cellSize,
-                background: isMixed ? ACTION_COLORS.mixed : bg,
+                background: bg,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
